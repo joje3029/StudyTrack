@@ -1,0 +1,28 @@
+# PostgreSQL 도커 볼륨
+pgdata/
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Node (for front)
+node_modules/
+dist/
+.build/
+.env
+.env.local
+
+# JetBrains IDE
+.idea/
+
+# VSCode
+.vscode/
+
+# 기타 빌드 산출물
+*.class
+*.jar
+*.war
+*.ear

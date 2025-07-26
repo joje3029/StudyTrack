@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    container_name: studytrack_pg_db
+    environment:
+      POSTGRES_USER: studytrack
+      POSTGRES_PASSWORD: studytrackpw
+      POSTGRES_DB: studytrackdb
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
