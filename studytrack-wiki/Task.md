@@ -13,10 +13,10 @@
 ---
 
 ## ⚙️ DB 및 API 설계
-- [T-DB-01] PostgreSQL Docker Compose 개발 환경 구성 ⭐ High
-- [T-DB-02] ERD 기반 엔티티 설계 및 코드 작성 ⭐ High
-- [T-DB-03] Repository, Service 기본 골격 작성 ⭐ High
-- [T-DB-04] 데이터 초기화 및 예제 시드 구성 ⭐ Medium
+- [T-DB-01] PostgreSQL Docker Compose 개발 환경 구성 ⭐ High (v) - 2025.07.26
+- [T-DB-02] ERD 기반 엔티티 설계 및 코드 작성 ⭐ High (v) - 2025.07.26
+- [T-DB-03] Repository, Service 기본 골격 작성 ⭐ High (v) - 2025.07.26
+- [T-DB-04] 데이터 초기화 및 예제 시드 구성 ⭐ Medium - 2025.07.26 : DB에가 데이터까지 함.
 
 ---
 
