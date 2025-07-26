@@ -1,0 +1,76 @@
+CREATE TABLE "user" (
+  "id" uuid PRIMARY KEY,
+  "nickname" varchar,
+  "status" varchar,
+  "deleted_at" timestamp,
+  "created_at" timestamp
+);
+
+CREATE TABLE "subject" (
+  "id" uuid PRIMARY KEY,
+  "name" varchar
+);
+
+CREATE TABLE "category" (
+  "id" uuid PRIMARY KEY,
+  "subject_id" uuid,
+  "name" varchar
+);
+
+CREATE TABLE "note" (
+  "id" uuid PRIMARY KEY,
+  "user_id" uuid,
+  "subject_id" uuid,
+  "category_id" uuid,
+  "title" varchar,
+  "content" text,
+  "created_at" timestamp
+);
+
+CREATE TABLE "problem" (
+  "id" uuid PRIMARY KEY,
+  "subject_id" uuid,
+  "category_id" uuid,
+  "type" varchar,
+  "question" text,
+  "answer" text,
+  "explanation" text,
+  "created_at" timestamp
+);
+
+CREATE TABLE "problem_attempt" (
+  "id" uuid PRIMARY KEY,
+  "user_id" uuid,
+  "problem_id" uuid,
+  "is_correct" boolean,
+  "attempted_at" timestamp
+);
+
+CREATE TABLE "wrong_note" (
+  "id" uuid PRIMARY KEY,
+  "user_id" uuid,
+  "problem_id" uuid,
+  "saved_at" timestamp
+);
+
+CREATE TABLE "task" (
+  "id" uuid PRIMARY KEY,
+  "user_id" uuid,
+  "content" varchar,
+  "is_goal" boolean,
+  "is_completed" boolean,
+  "due_date" date,
+  "completed_at" timestamp
+);
+
+ALTER TABLE "category" ADD FOREIGN KEY ("subject_id") REFERENCES "subject" ("id");
+ALTER TABLE "note" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "note" ADD FOREIGN KEY ("subject_id") REFERENCES "subject" ("id");
+ALTER TABLE "note" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("id");
+ALTER TABLE "problem" ADD FOREIGN KEY ("subject_id") REFERENCES "subject" ("id");
+ALTER TABLE "problem" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("id");
+ALTER TABLE "problem_attempt" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "problem_attempt" ADD FOREIGN KEY ("problem_id") REFERENCES "problem" ("id");
+ALTER TABLE "wrong_note" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
+ALTER TABLE "wrong_note" ADD FOREIGN KEY ("problem_id") REFERENCES "problem" ("id");
+ALTER TABLE "task" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
