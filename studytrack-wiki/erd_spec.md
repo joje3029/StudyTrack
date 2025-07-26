@@ -20,8 +20,8 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | id | UUID | PK |
 | nickname | string | 사용자 이름 |
 | status | enum | 'active', 'deleted' |
-| deleted_at | datetime | 탈퇴요청일 |
-| created_at | datetime | 가입일 |
+| deleted_at | timestamp| 탈퇴요청일 |
+| created_at | timestamp| 가입일 |
 
 ---
 
@@ -54,7 +54,7 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | category_id | UUID | 분류 |
 | title | string | 제목 |
 | content | text | 내용 |
-| created_at | datetime | 생성일 |
+| created_at | timestamp| 생성일 |
 
 ---
 
@@ -69,7 +69,7 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | question | text | 문제 내용 |
 | answer | text | 정답 |
 | explanation | text | 해설 |
-| created_at | datetime | 등록일 |
+| created_at | timestamp| 등록일 |
 
 ---
 
@@ -81,7 +81,7 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | user_id | UUID | 사용자 |
 | problem_id | UUID | 문제 |
 | is_correct | boolean | 정답 여부 |
-| attempted_at | datetime | 시도 일시 |
+| attempted_at | timestamp| 시도 일시 |
 
 ---
 
@@ -92,7 +92,7 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | id | UUID | PK |
 | user_id | UUID | 사용자 |
 | problem_id | UUID | 문제 |
-| saved_at | datetime | 저장 시점 |
+| saved_at | timestamp| 저장 시점 |
 
 ---
 
@@ -106,4 +106,4 @@ PNG 파일명은 제작일과 버전을 포함하여 `studytrack_YYYYMMDD01.png`
 | is_goal | boolean | 장기 목표 여부 |
 | is_completed | boolean | 완료 여부 |
 | due_date | date | 마감일 |
-| completed_at | datetime | 완료일 |
+| completed_at | timestamp| 완료일 |
