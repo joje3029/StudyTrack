@@ -1,0 +1,61 @@
+name: CI — Kotlin + Kover + ktlint + detekt
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Cache Gradle
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts','**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Run ktlint
+      run: ./gradlew ktlintCheck
+
+    - name: Run detekt
+      run: ./gradlew detekt
+
+    - name: Run Tests
+      run: ./gradlew test
+
+    - name: Generate coverage report
+      run: ./gradlew koverVerify koverXmlReport koverHtmlReport
+
+    - name: Upload HTML coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-html
+        path: build/reports/kover/html
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: mi-kas/kover-report@v1
+      with:
+        path: ${{ github.workspace }}/build/reports/kover/report.xml
+        title: "Code Coverage"
+        update-comment: true
+        min-coverage-overall: 80
+        coverage-counter-type: LINE
