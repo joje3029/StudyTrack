@@ -26,16 +26,16 @@
 
 | 항목 | 선택 기술 | 비고 |
 |------|-----------|------|
-| 언어 | **Kotlin** (JVM) | 간결하고 안전한 문법 |
+| 언어 | **Java 21** | 안정적이고 성숙한 생태계 |
 | JDK 버전 | **Java 21** | 최신 기능 및 성능 개선 활용 |
-| 빌드 도구 | **Gradle (Kotlin DSL)** | Kotlin 친화적인 설정 |
+| 빌드 도구 | **Gradle** | 유연한 빌드 설정 |
 | 프레임워크 | **Spring Boot 3.2.5** | 최신 Spring 기술 기반 |
 | 아티팩트 타입 | **JAR** | 독립 실행형 애플리케이션 |
 | 주요 모듈 | `spring-boot-starter-web` <br> `spring-boot-starter-security` <br> `spring-boot-starter-data-jpa` | REST API, 인증/인가, DB 연동 |
 | DB | **관계형 데이터베이스** (e.g. PostgreSQL, MySQL) | Spring Data JPA 활용 |
 | API 문서화 | **Swagger UI** (`springdoc-openapi`) | 자동 API 명세 및 테스트 UI 제공 |
-| 로깅 | [`kotlin-logging`](https://github.com/oshai/kotlin-logging) | 간결하고 강력한 Kotlin 로깅 래퍼 |
-| 코드 품질 | **Ktlint**, **Detekt** | 정적 분석 및 스타일 검사 |
+| 로깅 | **SLF4J** + **Logback** | 표준 Java 로깅 프레임워크 |
+| 코드 품질 | **Checkstyle**, **SpotBugs** | 정적 분석 및 스타일 검사 |
 | CI | ✅ Lint 실패 시 PR/PUSH 제한 | 코드 품질 강제 유지 |
 
 ---
