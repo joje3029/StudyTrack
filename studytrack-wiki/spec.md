@@ -88,9 +88,10 @@ StudyTrack/
 
 ## 🔐 품질 보증 전략 (Front & Back 공통)
 
+- **Git Flow 기반 브랜치 전략** → [브랜치 전략 가이드](./git-branch-strategy.md)
 - **Lint 필수 통과 → CI에서 PR/PUSH 차단**
 - **TDD 기반 테스트 개발**
-- **API 명세는 Swagger로 자동화**
+- **API 명세는 Swagger로 자동화**  
 - **코드 스타일은 팀/개인 기준에 따라 통일 관리**
 
 ---
