@@ -29,10 +29,10 @@
 | 언어 | **Java 21** | 안정적이고 성숙한 생태계 |
 | JDK 버전 | **Java 21** | 최신 기능 및 성능 개선 활용 |
 | 빌드 도구 | **Gradle** | 유연한 빌드 설정 |
-| 프레임워크 | **Spring Boot 3.2.5** | 최신 Spring 기술 기반 |
+| 프레임워크 | **Spring Boot 3.5.4** | 최신 Spring 기술 기반 |
 | 아티팩트 타입 | **JAR** | 독립 실행형 애플리케이션 |
 | 주요 모듈 | `spring-boot-starter-web` <br> `spring-boot-starter-security` <br> `spring-boot-starter-data-jpa` | REST API, 인증/인가, DB 연동 |
-| DB | **관계형 데이터베이스** (e.g. PostgreSQL, MySQL) | Spring Data JPA 활용 |
+| DB | **H2** (로컬/테스트), **PostgreSQL** (개발/운영) | 환경별 DB 분리 |
 | API 문서화 | **Swagger UI** (`springdoc-openapi`) | 자동 API 명세 및 테스트 UI 제공 |
 | 로깅 | **SLF4J** + **Logback** | 표준 Java 로깅 프레임워크 |
 | 코드 품질 | **Checkstyle**, **SpotBugs** | 정적 분석 및 스타일 검사 |
@@ -40,20 +40,49 @@
 
 ---
 
-## 📁 폴더 구조 제안 (예시) : 추후 수정 필요
-studytrack/
-├── front/ # 프론트엔드 (React)
+## 📁 현재 프로젝트 구조
+StudyTrack/
+├── studytrack-front/ # 프론트엔드 (React + TypeScript)
 │ ├── src/
 │ ├── .eslintrc.json
 │ ├── .prettierrc
 │ └── vite.config.ts
-├── back/ # 백엔드 (Spring Boot)
-│ ├── src/main/kotlin/
-│ ├── src/test/kotlin/
-│ ├── build.gradle.kts
-│ ├── .editorconfig
-│ └── detekt.yml
-└── README.md
+├── studytrack-backend/ # 백엔드 (Spring Boot + Java 21)
+│ ├── src/main/java/
+│ ├── src/test/java/
+│ ├── src/main/resources/ # 환경별 설정 파일
+│ ├── build.gradle
+│ ├── config/checkstyle/
+│ └── .editorconfig
+├── studytrack-wiki/ # 프로젝트 문서
+└── studytrack-erd/ # 데이터베이스 설계
+
+---
+
+## 🌍 환경별 설정
+
+### 데이터베이스 설정
+- **로컬 개발**: H2 인메모리 DB (별도 설치 불필요)
+- **테스트**: H2 인메모리 DB
+- **개발 서버**: PostgreSQL (`studytrack_dev`)
+- **운영 서버**: PostgreSQL (환경변수 기반)
+
+### 프로파일 설정
+- `application-local.yml`: 로컬 개발 환경
+- `application-dev.yml`: 개발 서버 환경  
+- `application-prod.yml`: 운영 환경
+- `application-test.yml`: 테스트 환경
+
+### 실행 방법
+```bash
+# 로컬 개발 (기본값)
+./gradlew bootRun
+
+# 개발 서버
+./gradlew bootRun --args='--spring.profiles.active=dev'
+
+# H2 콘솔: http://localhost:8080/h2-console
+```
 
 ---
 
