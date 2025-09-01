@@ -1,0 +1,143 @@
+# StudyTrack 프로젝트 개발 규칙
+
+## 🎯 프로젝트 개요
+개인 학습 기록과 문제 풀이를 위한 웹 애플리케이션
+- 백엔드: Spring Boot 3.5.4 + Java 21
+- 프론트엔드: React + TypeScript + Vite
+- 데이터베이스: H2 (로컬/테스트), PostgreSQL (개발/운영)
+
+## 📝 커밋 컨벤션
+커밋 메시지는 다음 형식을 따릅니다:
+
+### 기본 형식
+```
+[이모지] [type/#issue] 제목 (최대 50자)
+
+본문 (선택사항)
+- 무엇을, 왜 변경했는지 자세히 작성
+- 여러 줄의 메시지를 작성할 땐 "-"로 구분
+
+꼬리말 (선택사항)
+- 이슈 트래커 ID
+- BREAKING CHANGE가 있을 경우 명시
+```
+
+### 이모지 규칙
+- ✨ : 새로운 기능 추가
+- 🐛 : 버그 수정
+- ♻️ : 리팩토링
+- 🔥 : 코드/파일 제거
+- 📦 : 패키지 추가/업데이트
+- 🎨 : 코드 스타일 개선
+- ✅ : 테스트 추가
+- 📝 : 문서 수정
+- 🚀 : 배포 관련
+- 🚧 : 작업 중
+- 🔧 : 설정 변경
+- ⬆️ : 버전 업그레이드
+- ⬇️ : 버전 다운그레이드
+
+### Type 규칙
+- feature/ : 새로운 기능
+- fix/ : 버그 수정
+- docs/ : 문서 수정
+- refactor/ : 리팩토링
+- style/ : 코드 스타일 변경
+- test/ : 테스트 코드
+
+### 예시
+```
+✨ [feature/#42] 로그인 API 구현
+
+- JWT 기반 인증 로직 추가
+- 비밀번호 암호화 처리
+
+Resolves: #42
+```
+
+## 🔄 작은 PR/커밋 가이드
+
+### PR 단위 규칙
+1. **작게 쪼갠다**: 리뷰와 리버트가 쉽도록 작은 단위로 나눈다
+2. **폴더/패키지 단위**: controller, service, domain 등 패키지별로 나눈다
+3. **PR 크기**: 한 PR당 파일 5~10개 이내가 적당하다
+4. **기능 단위**: 필요시 더 작은 기능 단위로 분리한다
+
+### 커밋 단위 규칙
+1. **"깃발 꽂기"**: 커밋은 의미 있는 작업 단위로 나눈다
+2. **작은 단위**: 문제 발생 시 리버트가 쉽도록 작게 나눈다
+3. **3개 이내**: 원격 push 시 커밋은 3개 이내가 이상적
+4. **단일 책임**: 하나의 커밋은 하나의 목적만 가진다
+
+### 권장 분리 방법
+- **도메인별**: User, Study, Problem 등
+- **레이어별**: Controller → Service → Repository
+- **기능별**: CRUD 각각 분리
+- **설정별**: 환경설정, 보안설정 등
+
+## 🏗️ 코딩 컨벤션
+
+### Java 백엔드
+- **패키지명**: `com.studytrack.studytrackbackend`
+- **클래스명**: PascalCase (예: `UserService`)
+- **메서드명**: camelCase (예: `findUserById`)
+- **상수명**: UPPER_SNAKE_CASE (예: `MAX_LOGIN_ATTEMPTS`)
+- **변수명**: camelCase (예: `userId`)
+
+### 파일 구조
+```
+src/main/java/com/studytrack/studytrackbackend/
+├── config/          # 설정 클래스
+├── controller/      # REST 컨트롤러
+├── service/         # 비즈니스 로직
+├── domain/          # 엔티티 및 리포지토리
+├── dto/             # 데이터 전송 객체
+├── security/        # 보안 관련
+└── jwt/             # JWT 관련
+```
+
+### TypeScript 프론트엔드
+- **컴포넌트**: PascalCase (예: `LoginForm`)
+- **파일명**: kebab-case (예: `login-form.tsx`)
+- **변수/함수**: camelCase (예: `handleLogin`)
+- **상수**: UPPER_SNAKE_CASE (예: `API_BASE_URL`)
+
+## 🧪 테스트 규칙
+- **단위 테스트**: 각 메서드별로 작성
+- **통합 테스트**: API 엔드포인트별로 작성
+- **테스트 명명**: `should_[예상결과]_when_[조건]` 형식
+- **환경**: `@ActiveProfiles("test")` 사용
+
+## 📊 코드 품질
+- **Checkstyle**: Java 코드 스타일 검사
+- **SpotBugs**: 정적 분석으로 버그 탐지
+- **ESLint**: TypeScript/React 코드 검사
+- **Prettier**: 코드 포매팅 자동화
+
+## 🌍 환경 설정
+- **로컬**: H2 DB, `application-local.yml`
+- **테스트**: H2 DB, `application-test.yml`
+- **개발**: PostgreSQL, `application-dev.yml`
+- **운영**: PostgreSQL, `application-prod.yml`
+
+## 📋 작업 흐름
+1. **이슈 생성**: GitHub Issues에서 작업 단위 정의
+2. **브랜치 생성**: `feature/#이슈번호-간단설명`
+3. **작은 커밋**: 의미 있는 단위로 자주 커밋
+4. **작은 PR**: 리뷰하기 쉬운 크기로 PR 생성
+5. **코드 리뷰**: 팀원 리뷰 후 머지
+6. **배포**: main 브랜치 자동 배포
+
+## 🚫 금지 사항
+- 큰 덩어리 커밋 (10개 이상 파일 변경)
+- 의미 없는 커밋 메시지 ("수정", "버그픽스" 등)
+- 테스트 없는 기능 구현
+- 하드코딩된 설정값
+- console.log, System.out.println 등 디버그 코드 커밋
+
+## 💡 권장 사항
+- 커밋 전 `./gradlew build` 또는 `npm run build` 실행
+- PR 생성 전 충돌 해결
+- 코드 리뷰 시 건설적인 피드백
+- 문서화는 코드와 함께 업데이트
+- 이슈 트래커 활용으로 작업 진행 상황 공유
