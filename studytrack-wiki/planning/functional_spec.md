@@ -1,8 +1,8 @@
-## F-01 소셜 로그인
+## F-01 로그인 및 인증
 
 ### 프로젝트 나눔
 - Core 기능 (필수/초기 기능)
-    - 로그인
+    - **로그인 (자체/소셜)**
     - 분야/노트 관리
     - 문제 관리
     - 암기 세션
@@ -21,112 +21,131 @@
     - 반복 학습 일정
     - AI 리마인더
 
+### 1. 개요
+- **자체 로그인**과 **소셜 로그인(Google, Naver, Kakao)**을 모두 지원합니다.
+- 모든 인증 방식은 최종적으로 서버에서 **JWT(JSON Web Token)**를 발급받아 사용합니다.
+- 인증 관련 모든 API 통신은 **HTTPS**를 통해 암호화되어야 합니다.
 
-### 개요  
-- Google, Naver, Kakao 소셜 로그인 지원  
-- 자체 로그인 없음  
-- OAuth 2.0 프로토콜 기반 인증  
-- 토큰 받아서 백엔드로 전달 → JWT 발급 후 클라이언트 저장  
+### 2. 자체 로그인 (신규 추가)
 
-### 주요 흐름
+#### 주요 흐름
+1.  **회원가입**:
+    1.  사용자는 아이디(이메일), 비밀번호, 닉네임을 입력하여 회원가입을 요청합니다.
+    2.  서버는 아이디(이메일) 중복 여부를 확인합니다.
+    3.  비밀번호는 **BCrypt** 또는 **Argon2** 해시 함수로 암호화하여 데이터베이스에 저장합니다.
+    4.  회원가입 성공 시, 사용자에게 성공 메시지를 반환합니다.
+2.  **로그인**:
+    1.  사용자는 아이디(이메일)와 비밀번호를 입력하여 로그인을 요청합니다.
+    2.  서버는 사용자 존재 여부를 확인하고, 제출된 비밀번호를 저장된 해시와 비교합니다.
+    3.  인증 성공 시, **Access Token**과 **Refresh Token**을 JWT 형식으로 발급합니다.
+    4.  클라이언트는 토큰을 안전한 곳(HttpOnly Cookie 또는 Secure Storage)에 저장하고 로그인 상태를 유지합니다.
 
-1. 사용자가 로그인 화면에서 원하는 소셜 로그인 버튼 클릭  
-2. OAuth 인증 팝업/리다이렉트 진행 (각 소셜별 인증)  
-3. 인증 완료 후, OAuth 액세스 토큰 클라이언트 획득  
-4. 액세스 토큰을 백엔드 API에 전달  
-5. 백엔드는 토큰 검증 → 사용자 정보 조회 및 신규 사용자 DB 저장  
-6. JWT 토큰 발급 후 클라이언트에 전달  
-7. 클라이언트는 JWT 토큰 저장 (LocalStorage 혹은 Secure Cookie)  
-8. 로그인 성공 화면(메인 페이지)으로 이동  
+### 3. 소셜 로그인
 
-### 예외 처리
+#### 주요 흐름
+1.  사용자가 로그인 화면에서 원하는 소셜 로그인 버튼을 클릭합니다.
+2.  OAuth 2.0 인증 절차를 통해 각 소셜 플랫폼으로부터 **Access Token**을 발급받습니다.
+3.  클라이언트는 발급받은 소셜 Access Token을 서버에 전달합니다.
+4.  서버는 해당 토큰을 검증하고 사용자 정보를 조회합니다.
+    -   기존 사용자가 아닌 경우, 해당 소셜 정보로 신규 회원가입을 자동 처리합니다.
+5.  인증 성공 시, 서버는 자체 **Access Token**과 **Refresh Token**을 JWT 형식으로 발급합니다.
+6.  클라이언트는 토큰을 저장하고 로그인 상태를 유지합니다.
 
-- OAuth 인증 실패 또는 취소 시 → 로그인 실패 알림 표시  
-- 백엔드 토큰 검증 실패 → 재로그인 유도  
-- 네트워크 오류 시 → 적절한 오류 메시지 및 재시도 안내  
+### 4. 핵심 보안 요구사항
 
-### API 상세 명세
+| 항목 | 내용 | 필수 구현 사항 |
+| :--- | :--- | :--- |
+| **비밀번호 저장** | 사용자의 비밀번호는 절대 평문으로 저장해서는 안 되며, 복호화가 불가능한 단방향 해시 함수를 사용해야 합니다. | - **BCrypt** 또는 **Argon2** 사용<br>- 사용자별로 고유한 Salt를 적용하여 Rainbow Table 공격 방지 |
+| **인증 토큰** | 상태 비저장(Stateless) 인증을 위해 JWT를 사용하며, 토큰 탈취에 대비한 정책이 필요합니다. | - Access Token은 만료 시간을 짧게(예: 15분~1시간) 설정<br>- Refresh Token은 만료 시간을 길게(예: 7일~30일) 설정하고, 안전한 저장소(DB 등)에 보관<br>- Refresh Token을 사용하여 Access Token을 재발급하는 로직 구현 |
+| **전송 계층 보안** | 클라이언트와 서버 간의 모든 통신은 암호화되어야 합니다. | - **HTTPS/TLS** 적용 필수 |
+| **로그인 시도 제한** | Brute-force 및 무차별 대입 공격을 방지하기 위한 보호 조치가 필요합니다. | - 특정 시간 동안 일정 횟수 이상 로그인 실패 시 계정 잠금(예: 5회 실패 시 5분간 잠금)<br>- IP 기반으로도 요청 횟수를 제한하여 비정상적인 트래픽 차단 |
+| **보안 헤더** | XSS, CSRF 등 웹 취약점 공격을 방지하기 위해 HTTP 응답 헤더를 설정해야 합니다. | - `X-Content-Type-Options: nosniff`<br>- `X-Frame-Options: deny`<br>- `Content-Security-Policy` (CSP) 설정 |
+| **세션/토큰 관리** | 로그아웃 및 토큰 만료 시 명확한 처리가 필요합니다. | - 로그아웃 시 서버에서 Refresh Token을 무효화 처리<br>- 클라이언트 측에서도 저장된 토큰을 즉시 삭제 |
 
-#### `POST /api/v1/auth/login`
+### 5. API 상세 명세
 
-- **설명**: 클라이언트에서 전달받은 OAuth Access Token을 검증하고, 해당 사용자를 시스템에 로그인 처리합니다. 신규 사용자일 경우 자동으로 회원가입이 진행됩니다.
-- **Content-Type**: `application/json`
+#### `POST /api/v1/auth/register` (자체 회원가입)
+- **설명**: 이메일, 비밀번호, 닉네임을 사용하여 신규 사용자를 등록합니다.
 - **인증**: 필요 없음
+
+**Request Body**
+| 필드 | 타입 | 제약조건 | 설명 |
+|---|---|---|---|
+| `email` | String | `Not Null`, `Email Format` | 로그인 시 사용할 이메일 주소 |
+| `password` | String | `Not Null`, `Min 8 chars` | 비밀번호 (영문, 숫자, 특수문자 조합) |
+| `nickname` | String | `Not Null`, `Max 50` | 사용자 닉네임 |
+
+**Success Response (`201 Created`)**
+- Body 없음.
+
+**Error Responses**
+| Status Code | errorCode | 설명 |
+|---|---|---|
+| `400 Bad Request` | `INVALID_INPUT` | 이메일, 비밀번호, 닉네임 형식이 유효하지 않음 |
+| `409 Conflict` | `EMAIL_ALREADY_EXISTS` | 이미 가입된 이메일 |
+| `409 Conflict` | `NICKNAME_ALREADY_EXISTS` | 이미 사용 중인 닉네임 |
 
 ---
 
-#### **Request Body**
+#### `POST /api/v1/auth/login` (자체 로그인)
+- **설명**: 이메일과 비밀번호로 사용자를 인증하고 JWT를 발급합니다.
+- **인증**: 필요 없음
 
+**Request Body**
+| 필드 | 타입 | 제약조건 | 설명 |
+|---|---|---|---|
+| `email` | String | `Not Null`, `Email Format` | 가입된 이메일 주소 |
+| `password` | String | `Not Null` | 비밀번호 |
+
+**Success Response (`200 OK`)**
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| `accessToken` | String | 서버가 발급한 JWT Access Token |
+| `refreshToken` | String | Access Token 재발급에 사용될 Refresh Token |
+| `user` | Object | 로그인한 사용자 정보 |
+
+---
+
+#### `POST /api/v1/auth/social-login` (소셜 로그인)
+- **설명**: 소셜 플랫폼의 Access Token을 받아 사용자를 인증하고 JWT를 발급합니다.
+- **인증**: 필요 없음
+
+**Request Body**
 | 필드 | 타입 | 제약조건 | 설명 |
 |---|---|---|---|
 | `provider` | String | `Enum` ("google", "kakao", "naver") | OAuth 제공자 |
-| `accessToken` | String | `Not Null` | OAuth 제공자로부터 발급받은 Access Token |
+| `providerAccessToken` | String | `Not Null` | 소셜 플랫폼에서 발급받은 Access Token |
 
-**Request 예시**
-```json
-{
-  "provider": "google",
-  "accessToken": "ya29.a0AfB..."
-}
-```
+**Success Response (`200 OK`)**
+- 자체 로그인 성공 응답과 동일한 구조를 가집니다.
 
 ---
 
-#### **Success Response (`200 OK`)**
+#### `POST /api/v1/auth/refresh` (토큰 재발급)
+- **설명**: 유효한 Refresh Token을 사용하여 만료된 Access Token을 재발급받습니다.
+- **인증**: 필요 없음 (Request Body의 Refresh Token으로 검증)
 
-- **설명**: 로그인 또는 회원가입 성공 시, 서버에서 발급한 `accessToken`과 사용자 정보를 반환합니다.
+**Request Body**
+| 필드 | 타입 | 제약조건 | 설명 |
+|---|---|---|---|
+| `refreshToken` | String | `Not Null` | 기존에 발급받은 Refresh Token |
 
+**Success Response (`200 OK`)**
 | 필드 | 타입 | 설명 |
 |---|---|---|
-| `accessToken` | String | 서버가 발급한 JWT (Bearer 토큰) |
-| `user` | Object | 로그인한 사용자 정보 |
-| `user.id` | UUID | 사용자의 고유 ID |
-| `user.nickname` | String | 사용자의 닉네임 |
-
-**Response 예시**
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "nickname": "개발왕"
-  }
-}
-```
+| `accessToken` | String | 새로 발급된 JWT Access Token |
 
 ---
 
-#### **Error Responses**
-
-- **공통 에러 포맷**
-```json
-{
-  "errorCode": "string",
-  "message": "string"
-}
-```
-
-| Status Code | errorCode | 설명 |
-|---|---|---|
-| `400 Bad Request` | `INVALID_PROVIDER` | `provider` 필드에 지원하지 않는 값이 들어온 경우 |
-| `400 Bad Request` | `TOKEN_NOT_PROVIDED` | `accessToken`이 누락된 경우 |
-| `401 Unauthorized` | `INVALID_OAUTH_TOKEN` | OAuth Access Token이 유효하지 않은 경우 |
-| `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | 서버 내부 로직 처리 중 에러 발생 |
-
-
-### UI 구성 요소
-
-- 로그인 페이지  
-  - 소셜 로그인 버튼 3개 (Google, Naver, Kakao)  
-  - 로그인 상태 알림 및 에러 메시지 영역  
-
----
-
-### 추가 고려 사항
-
-- JWT 저장 위치에 따른 보안 정책 수립 (XSS, CSRF 방지)  
-- 토큰 갱신(Refresh Token) 정책 및 만료 처리  
-- 로그아웃 시 토큰 삭제 및 세션 종료  
+### 6. UI 구성 요소
+- **로그인 페이지**:
+  - 자체 로그인 폼 (이메일, 비밀번호 입력)
+  - 회원가입, 비밀번호 찾기 링크
+  - 소셜 로그인 버튼 (Google, Naver, Kakao)
+  - 로그인 상태 알림 및 에러 메시지 영역
+- **회원가입 페이지**:
+  - 이메일, 비밀번호, 비밀번호 확인, 닉네임 입력 폼
+  - 각 필드별 유효성 검사 메시지 영역  
 
 ---
 ---

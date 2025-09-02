@@ -32,9 +32,12 @@
 - **역할**: 애플리케이션의 사용자 정보를 저장합니다.
 - **필드**:
 | 필드 | 타입 | 제약조건 | 설명 |
-|------|------|----------|------|
+|--- |--- |--- |---|
 | id | UUID | PK | 고유 식별자 |
+| email | VARCHAR(255) | UNIQUE | 로그인용 이메일 (자체 로그인 시 필수) |
+| password_hash | VARCHAR(255) | | 암호화된 비밀번호 (자체 로그인 시 필수) |
 | nickname | VARCHAR(50) | NOT NULL | 사용자 이름 |
+| provider | VARCHAR(20) | NOT NULL | 가입 경로 ('local', 'google', 'kakao') |
 | status | VARCHAR(20) | NOT NULL | 계정 상태 ('active', 'deleted') |
 | deleted_at | TIMESTAMP | | 탈퇴 요청일 |
 | created_at | TIMESTAMP | NOT NULL | 가입일 |
