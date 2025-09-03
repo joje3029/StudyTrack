@@ -5,6 +5,36 @@
 
 ---
 
+## 🏗️ 시스템 아키텍처
+
+```mermaid
+graph TD
+    subgraph 사용자
+        A[🧑 사용자 브라우저]
+    end
+
+    subgraph 프론트엔드 (React + Vite)
+        B[🌐 React App<br/>(Vite + Zustand + Tailwind)]
+    end
+
+    subgraph 백엔드 (Java + Spring Boot)
+        C[🚀 Spring Boot API 서버<br/>(Java, JPA, Swagger)]
+        D[⚡ FastAPI LLM 서버<br/> (문제 채점 전용)]
+    end
+
+    subgraph 데이터베이스 (Docker)
+        E[(🛢️ PostgreSQL DB)]
+    end
+
+    A --> B
+    B -->|REST API 요청| C
+    C -->|JPA/SQL 처리| E
+    C -->|LLM 채점 요청| D
+    D -->|채점 결과 응답| C
+```
+
+---
+
 ## ⚛️ 프론트엔드 스택
 
 | 항목 | 선택 기술 | 비고 |
@@ -41,22 +71,16 @@
 
 ---
 
-## 📁 현재 프로젝트 구조
+## 📁 프로젝트 구조
 StudyTrack/
-├── studytrack-front/ # 프론트엔드 (React + TypeScript)
-│ ├── src/
-│ ├── .eslintrc.json
-│ ├── .prettierrc
-│ └── vite.config.ts
-├── studytrack-backend/ # 백엔드 (Spring Boot + Java 21)
-│ ├── src/main/java/
-│ ├── src/test/java/
-│ ├── src/main/resources/ # 환경별 설정 파일
-│ ├── build.gradle
-│ ├── config/checkstyle/
-│ └── .editorconfig
-├── studytrack-wiki/ # 프로젝트 문서
-└── studytrack-erd/ # 데이터베이스 설계
+├── studytrack-front/     # 프론트엔드 (React + TypeScript)
+├── studytrack-backend/    # 백엔드 (Spring Boot + Java 21)
+└── studytrack-erd/ # 데이터베이스 설계 및 변경 기록
+└── studytrack-wiki/       # 프로젝트 기획 및 명세 문서
+    ├── database/          # 데이터베이스 스키마 (DBML)
+    ├── design/            # 아키텍처, 기술 스택 등 설계 문서
+    ├── planning/          # 기능 명세, Task 등 기획 문서
+    └── collaboration/     # 협업 규칙 관련 문서
 
 ---
 
