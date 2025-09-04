@@ -1,9 +1,17 @@
 CREATE TABLE "user" (
-  "id" uuid PRIMARY KEY,
-  "nickname" varchar,
-  "status" varchar,
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "email" varchar(255) UNIQUE NOT NULL,
+  "password" varchar(255),
+  "nickname" varchar(100) NOT NULL,
+  "provider" varchar(20) NOT NULL DEFAULT 'self',
+  "social_id" varchar(255),
+  "status" varchar(20) NOT NULL DEFAULT 'active',
+  "email_verified" boolean DEFAULT false,
+  "profile_image_url" varchar(500),
+  "last_login_at" timestamp,
   "deleted_at" timestamp,
-  "created_at" timestamp
+  "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" timestamp DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "subject" (

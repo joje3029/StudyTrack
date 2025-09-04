@@ -1,0 +1,138 @@
+
+Project 학습플랫폼 {
+  database_type: "PostgreSQL"
+}
+
+Table user {
+  id uuid [pk]
+  email varchar [unique, not null]
+  password varchar [note: '자체 로그인용, 소셜 로그인 시 NULL']
+  nickname varchar [not null]
+  provider varchar [not null, default: 'self', note: 'self, google, naver, kakao']
+  social_id varchar [note: '소셜 로그인 고유 ID']
+  status varchar [not null, default: 'active', note: 'active, inactive, suspended']
+  email_verified boolean [default: false]
+  profile_image_url varchar
+  last_login_at timestamp
+  deleted_at timestamp
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table refresh_tokens {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  token_id varchar [unique, not null]
+  token_hash varchar [not null]
+  expires_at timestamp [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  last_used_at timestamp
+  is_revoked boolean [default: false]
+  device_info varchar
+  ip_address inet
+}
+
+Table subject {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  name varchar [not null]
+  description text
+  color varchar [default: '#3B82F6']
+  sort_order integer [default: 0]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table category {
+  id uuid [pk]
+  subject_id uuid [ref: > subject.id]
+  name varchar [not null]
+  description text
+  sort_order integer [default: 0]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table note {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  subject_id uuid [ref: > subject.id]
+  category_id uuid [ref: > category.id]
+  title varchar [not null]
+  content text [not null]
+  content_type varchar [default: 'html']
+  is_favorite boolean [default: false]
+  view_count integer [default: 0]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table problem {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  subject_id uuid [ref: > subject.id]
+  category_id uuid [ref: > category.id]
+  type varchar [not null, default: 'subjective']
+  question text [not null]
+  answer text [not null]
+  explanation text
+  options jsonb
+  difficulty integer [default: 1]
+  tags jsonb
+  is_public boolean [default: false]
+  solve_count integer [default: 0]
+  correct_count integer [default: 0]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table problem_attempt {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  problem_id uuid [ref: > problem.id]
+  user_answer text [not null]
+  is_correct boolean [not null]
+  score integer [default: 0]
+  time_taken integer
+  llm_feedback text
+  attempt_number integer [not null]
+  attempted_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table wrong_note {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  problem_id uuid [ref: > problem.id]
+  attempt_id uuid [ref: > problem_attempt.id]
+  status varchar [default: 'active']
+  note text
+  resolved_at timestamp
+  saved_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table task {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  content varchar [not null]
+  is_goal boolean [default: true]
+  is_completed boolean [default: false]
+  priority integer [default: 2]
+  due_date date
+  completed_at timestamp
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table file_attachment {
+  id uuid [pk]
+  user_id uuid [ref: > user.id]
+  note_id uuid [ref: > note.id]
+  original_name varchar [not null]
+  stored_name varchar [not null]
+  file_path varchar [not null]
+  file_size bigint [not null]
+  mime_type varchar [not null]
+  file_extension varchar [not null]
+  is_deleted boolean [default: false]
+  uploaded_at timestamp [default: `CURRENT_TIMESTAMP`]
+}
