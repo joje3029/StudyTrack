@@ -1,3 +1,26 @@
+## 공통 규칙
+- 모든 API는 **공통 응답 구조**를 따른다:
+
+```json
+{
+  "guid": "G2025090410300012",
+  "resultCode": "00000",
+  "resultMessage": "작업이 성공적으로 완료되었습니다.",
+  "data": {}
+}
+```
+
+- **공통 응답 필드**
+  - `guid`: 요청/응답 고유 식별자
+  - `resultCode`: 5자리 결과 코드 (`00000`=성공, 그 외 오류)
+  - `resultMessage`: 사용자 친화적 설명 메시지
+  - `data`: 실제 데이터 (Object, Array, Primitive)
+
+- 에러 응답은 `api_response_spec.md`의 코드 체계를 따른다.
+- 모든 API는 HTTPS를 사용한다.
+
+---
+
 ## F-01 로그인 및 인증
 
 ### 1. 개요
@@ -134,7 +157,7 @@ sequenceDiagram
 
 #### 1. `POST /auth/register`
 - **설명**: 자체 회원가입 수행
-- **인증**: 불필요 (비로그인 상태)
+- **인증**: 불필요 (비로그인 상태에서만 접근 가능)
 
 **Request Body**
 | 필드 | 타입 | 제약조건 | 설명 |
@@ -144,41 +167,50 @@ sequenceDiagram
 | `nickname` | String | `Not Null`, 최대 50자 | 닉네임 |
 
 **Success Response (201 Created)**
-| 필드 | 타입 | 설명 |
-|---|---|---|
-| `id` | UUID | 생성된 사용자 ID |
-| `email` | String | 사용자 이메일 |
+```json
+{
+  "guid": "G2025090410300012",
+  "resultCode": "00000",
+  "resultMessage": "회원가입이 완료되었습니다.",
+  "data": {
+    "id": "UUID",
+    "email": "user@example.com"
+  }
+}
+```
 
 **Error Responses**
-| Status | errorCode | 설명 |
-|---|---|---|
-| 400 | `INVALID_INPUT` | 잘못된 입력 |
-| 409 | `EMAIL_DUPLICATED` | 이메일 중복 |
-| 409 | `NICKNAME_DUPLICATED` | 닉네임 중복 |
+- `40003` 입력값이 유효하지 않습니다
+- `43001` 이미 존재하는 데이터입니다 (이메일/닉네임 중복)
 
 ---
 
 #### 2. `POST /auth/login`
 - **설명**: 자체 로그인 수행
-- **인증**: 불필요 (비로그인 상태)
+- **인증**: 불필요 (비로그인 상태에서만 접근 가능)
 
 **Request Body**
-| 필드 | 타입 | 제약조건 | 설명 |
-|---|---|---|---|
-| `email` | String | `Not Null` | 사용자 이메일 |
-| `password` | String | `Not Null` | 사용자 비밀번호 |
-
-**Success Response (200 OK)**
 | 필드 | 타입 | 설명 |
 |---|---|---|
-| `accessToken` | String | Access Token |
-| `refreshToken` | String | Refresh Token |
+| `email` | String | 사용자 이메일 |
+| `password` | String | 사용자 비밀번호 |
+
+**Success Response (200 OK)**
+```json
+{
+  "guid": "G2025090410300022",
+  "resultCode": "00000",
+  "resultMessage": "로그인 성공",
+  "data": {
+    "accessToken": "jwt-access-token",
+    "refreshToken": "jwt-refresh-token"
+  }
+}
+```
 
 **Error Responses**
-| Status | errorCode | 설명 |
-|---|---|---|
-| 401 | `INVALID_CREDENTIALS` | 이메일/비밀번호 불일치 |
-| 403 | `ACCOUNT_DISABLED` | 계정 비활성화 |
+- `41004` 유효하지 않은 인증 정보입니다 (잘못된 이메일/비밀번호)
+- `43003` 비활성화된 계정입니다
 
 ---
 
@@ -193,15 +225,20 @@ sequenceDiagram
 | `accessToken` | String | 소셜 서버에서 발급된 액세스 토큰 |
 
 **Success Response (200 OK)**
-| 필드 | 타입 | 설명 |
-|---|---|---|
-| `accessToken` | String | Access Token |
-| `refreshToken` | String | Refresh Token |
+```json
+{
+  "guid": "G2025090410300033",
+  "resultCode": "00000",
+  "resultMessage": "소셜 로그인 성공",
+  "data": {
+    "accessToken": "jwt-access-token",
+    "refreshToken": "jwt-refresh-token"
+  }
+}
+```
 
 **Error Responses**
-| Status | errorCode | 설명 |
-|---|---|---|
-| 401 | `INVALID_SOCIAL_TOKEN` | 액세스 토큰 검증 실패 |
+- `41004` 유효하지 않은 인증 정보입니다 (잘못된 소셜 토큰)
 
 ---
 
@@ -211,8 +248,15 @@ sequenceDiagram
 
 **Request Body** 없음
 
-**Success Response (204 No Content)**
-- Refresh Token 무효화 및 클라이언트 측 삭제
+**Success Response (200 OK)**
+```json
+{
+  "guid": "G2025090410300044",
+  "resultCode": "00000",
+  "resultMessage": "로그아웃이 완료되었습니다.",
+  "data": {}
+}
+```
 
 ---
 
@@ -267,6 +311,67 @@ sequenceDiagram
 | 입력값 검증 | 잘못된 입력값 방지 | - 이름 길이 제한(최대 100자)<br>- SQL Injection 방지 |
 | 전송 보안 | 통신 암호화 | - HTTPS/TLS 적용 |
 
+### 6. API 상세 명세
+#### 1. `POST /subjects`
+- **설명**: 학습 분야 생성
+- **인증**: 필요 (로그인 사용자)
+
+**Request Body**
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| `name` | String | 학습 분야 이름 |
+
+**Success Response**
+```json
+{
+  "guid": "G2025090410400011",
+  "resultCode": "00000",
+  "resultMessage": "분야가 생성되었습니다.",
+  "data": {
+    "id": "UUID",
+    "name": "수학"
+  }
+}
+```
+
+**Error Responses**
+- `43001` 이미 존재하는 데이터입니다 (중복 이름)
+- `40003` 입력값이 유효하지 않습니다
+
+---
+
+#### 2. `GET /subjects`
+- **설명**: 내 학습 분야 목록 조회
+- **인증**: 필요
+
+**Success Response**
+```json
+{
+  "guid": "G2025090410400022",
+  "resultCode": "00000",
+  "resultMessage": "조회 성공",
+  "data": [
+    { "id": "UUID", "name": "수학" },
+    { "id": "UUID", "name": "영어" }
+  ]
+}
+```
+
+---
+
+#### 3. `PUT /subjects/{id}`
+- **설명**: 학습 분야 수정
+- **인증**: 필요
+
+---
+
+#### 4. `DELETE /subjects/{id}`
+- **설명**: 학습 분야 삭제
+- **인증**: 필요
+
+**Error Responses**
+- `43002` 존재하지 않는 데이터입니다
+
 ---
 
 ## F-03 노트 관리
@@ -306,6 +411,40 @@ sequenceDiagram
 | 인증/인가 | 본인만 노트 접근 가능 | JWT 검증 + 사용자 ID 매칭 |
 | 데이터 무결성 | 잘못된 HTML/스크립트 방지 | XSS 필터링 적용 |
 | 전송 보안 | 데이터 암호화 | HTTPS 필수 |
+
+### 6. API 상세 명세
+
+#### 1. `POST /notes`
+- **설명**: 노트 생성
+- **인증**: 필요
+
+**Request Body**
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| `subjectId` | UUID | 학습 분야 ID |
+| `content` | String | 노트 내용 |
+
+**Success Response**
+```json
+{
+  "guid": "G2025090410500011",
+  "resultCode": "00000",
+  "resultMessage": "노트가 생성되었습니다.",
+  "data": {
+    "id": "UUID",
+    "subjectId": "UUID"
+  }
+}
+```
+
+---
+
+#### 2. `GET /notes/{id}`
+- **설명**: 노트 조회
+- **인증**: 필요
+- **Error Responses**
+  - `43002` 존재하지 않는 데이터입니다
+  - `41003` 접근 권한이 없습니다 (타인 데이터 접근 시)
 
 ---
 
@@ -349,6 +488,38 @@ sequenceDiagram
 | 데이터 검증 | 입력값 유효성 | 문제 유형, 옵션 검증 |
 | 외부 통신 보안 | LLM 통신 암호화 | HTTPS + API Key |
 
+### 6. API 상세 명세
+
+#### 1. `POST /questions`
+- **설명**: 문제 생성
+- **인증**: 필요
+
+**Error Responses**
+- `40003` 입력값이 유효하지 않습니다
+
+---
+
+#### 2. `POST /questions/{id}/submit`
+- **설명**: 문제 풀이 제출 + 채점
+- **인증**: 필요
+
+**Success Response**
+```json
+{
+  "guid": "G2025090411000011",
+  "resultCode": "00000",
+  "resultMessage": "채점 완료",
+  "data": {
+    "score": 80,
+    "isCorrect": true
+  }
+}
+```
+
+**Error Responses**
+- `43002` 존재하지 않는 데이터입니다
+- `50001` 서버 내부 오류가 발생했습니다 (LLM 연동 실패 시)
+
 ---
 
 ## F-05 오답노트 관리
@@ -381,6 +552,24 @@ sequenceDiagram
 | 데이터 보존 | 데이터 무결성 | 삭제/수정 시 권한 확인 |
 | 전송 보안 | HTTPS |
 
+### 5. API 상세 명세
+
+#### `GET /wrong-notes`
+- **설명**: 내 오답 리스트 조회
+- **인증**: 필요
+
+**Success Response**
+```json
+{
+  "guid": "G2025090411100011",
+  "resultCode": "00000",
+  "resultMessage": "조회 성공",
+  "data": [
+    { "id": "UUID", "questionId": "UUID", "status": "틀림" }
+  ]
+}
+```
+
 ---
 
 ## F-06 암기 세션 모드
@@ -412,6 +601,27 @@ sequenceDiagram
 | 인증 | 로그인 사용자만 사용 | JWT 필요 |
 | 데이터 검증 | 세션/카드 ID 검증 | 잘못된 ID 접근 차단 |
 | 전송 보안 | HTTPS |
+
+### 5. API 상세 명세
+
+#### `POST /sessions/memorization`
+- **설명**: 암기 세션 시작
+- **인증**: 필요
+
+**Success Response**
+```json
+{
+  "guid": "G2025090411200011",
+  "resultCode": "00000",
+  "resultMessage": "세션 시작",
+  "data": {
+    "sessionId": "UUID",
+    "cards": [
+      { "front": "단어", "back": "뜻" }
+    ]
+  }
+}
+```
 
 ---
 
@@ -468,3 +678,32 @@ sequenceDiagram
 | 데이터 검증 | 날짜/내용 검증 | 날짜 형식 YYYY-MM-DD, 내용 길이 제한 |
 | 데이터 무결성 | 수정/삭제 권한 확인 | 본인 데이터만 수정 가능 |
 | 전송 보안 | HTTPS 적용 | 모든 API 암호화 |
+
+### 6. API 상세 명세
+#### 1. `POST /calendar/goals`
+- **설명**: 목표 등록
+- **인증**: 필요
+
+---
+
+#### 2. `PUT /calendar/goals/{id}`
+- **설명**: 목표 수정
+- **인증**: 필요
+
+---
+
+#### 3. `GET /calendar/goals`
+- **설명**: 내 목표 조회
+- **인증**: 필요
+
+**Success Response**
+```json
+{
+  "guid": "G2025090411300011",
+  "resultCode": "00000",
+  "resultMessage": "조회 성공",
+  "data": [
+    { "id": "UUID", "date": "2025-09-04", "content": "수학 문제 10개", "status": "완료" }
+  ]
+}
+```
