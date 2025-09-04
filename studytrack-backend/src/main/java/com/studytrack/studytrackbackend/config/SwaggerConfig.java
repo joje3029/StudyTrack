@@ -1,0 +1,48 @@
+package com.studytrack.studytrackbackend.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.Components;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI studyTrackOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("StudyTrack API")
+                        .description("개인 학습 기록과 문제 풀이를 위한 웹 애플리케이션 API")
+                        .version("1.0.0")
+                        .contact(new Contact()
+                                .name("StudyTrack Team")
+                                .email("support@studytrack.com"))
+                        .license(new License()
+                                .name("MIT License")
+                                .url("https://opensource.org/licenses/MIT")))
+                .servers(List.of(
+                        new Server()
+                                .url("http://localhost:8080")
+                                .description("로컬 개발 서버"),
+                        new Server()
+                                .url("https://api.studytrack.com")
+                                .description("운영 서버")))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth",
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .description("JWT 토큰을 입력하세요")))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    }
+}
