@@ -1,61 +1,130 @@
-name: CI — Kotlin + Kover + ktlint + detekt
+# 백엔드 CI/CD 파이프라인
+# - Java 21 Spring Boot 프로젝트용 설정
+# - 코드 품질 검사: Checkstyle, SpotBugs
+# - 테스트 실행 및 커버리지 측정: JUnit + JaCoCo
+# - 최소 커버리지 70% 강제
+name: Backend CI
 
+# 트리거 조건: main/develop 브랜치에 push하거나 PR 생성 시
+# 단, studytrack-backend 디렉토리 변경이 있을 때만 실행 (성능 최적화)
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths: 
+      - 'studytrack-backend/**'          # 백엔드 코드 변경시
+      - '.github/workflows/ci.yml'       # 이 워크플로우 파일 변경시
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+    paths: 
+      - 'studytrack-backend/**'
+      - '.github/workflows/ci.yml'
+
+# 모든 명령어는 studytrack-backend 디렉토리에서 실행
+defaults:
+  run:
+    working-directory: studytrack-backend
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    # GitHub Actions 권한 설정
     permissions:
-      contents: read
-      pull-requests: write
+      contents: read          # 코드 읽기
+      pull-requests: write    # PR에 댓글 작성 (커버리지 리포트)
+      checks: write          # 체크 결과 작성
 
     steps:
+    # 1. 소스코드 체크아웃
     - uses: actions/checkout@v4
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
+    # 2. Java 21 설정 (Eclipse Temurin 배포판 사용)
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
 
-    - name: Cache Gradle
-      uses: actions/cache@v3
+    # 3. Gradle 캐시 설정 (빌드 속도 향상)
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts','**/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-gradle-${{ hashFiles('studytrack-backend/**/*.gradle', 'studytrack-backend/**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Run ktlint
-      run: ./gradlew ktlintCheck
+    # 4. Gradle Wrapper 실행 권한 부여
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-    - name: Run detekt
-      run: ./gradlew detekt
+    # 5. 코드 스타일 검사 (Google Java Style Guide 기반)
+    - name: Run Checkstyle
+      run: ./gradlew checkstyleMain checkstyleTest
 
-    - name: Run Tests
-      run: ./gradlew test
+    # 6. 정적 분석 도구 실행 (잠재적 버그 탐지)
+    - name: Run SpotBugs
+      run: ./gradlew spotbugsMain spotbugsTest
 
-    - name: Generate coverage report
-      run: ./gradlew koverVerify koverXmlReport koverHtmlReport
+    # 7. PMD 코드 품질 분석 실행
+    - name: Run PMD
+      run: ./gradlew pmdMain pmdTest
 
-    - name: Upload HTML coverage report
-      uses: actions/upload-artifact@v3
+    # 8. 단위 테스트 실행 및 커버리지 리포트 생성
+    - name: Run Tests with Coverage
+      run: ./gradlew test jacocoTestReport
+
+    # 9. 커버리지 검증 (최소 70% 강제)
+    - name: Verify Coverage
+      run: ./gradlew jacocoTestCoverageVerification
+
+    # 10. 테스트 결과 업로드 (실패시에도 업로드)
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()  # 테스트 실패해도 결과 업로드
       with:
-        name: coverage-html
-        path: build/reports/kover/html
+        name: test-results
+        path: studytrack-backend/build/reports/tests/
 
-    - name: Comment coverage on PR
-      if: github.event_name == 'pull_request'
-      uses: mi-kas/kover-report@v1
+    # 11. 커버리지 리포트 업로드
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
       with:
-        path: ${{ github.workspace }}/build/reports/kover/report.xml
-        title: "Code Coverage"
-        update-comment: true
-        min-coverage-overall: 80
-        coverage-counter-type: LINE
+        name: coverage-reports
+        path: studytrack-backend/build/reports/jacoco/
+
+    # 12. Checkstyle 리포트 업로드
+    - name: Upload Checkstyle Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: checkstyle-reports
+        path: studytrack-backend/build/reports/checkstyle/
+
+    # 13. SpotBugs 리포트 업로드
+    - name: Upload SpotBugs Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: spotbugs-reports
+        path: studytrack-backend/build/reports/spotbugs/
+
+    # 14. PMD 리포트 업로드
+    - name: Upload PMD Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: pmd-reports
+        path: studytrack-backend/build/reports/pmd/
+
+    # 15. PR에 커버리지 리포트 댓글 자동 생성
+    - name: Comment PR with Coverage
+      if: github.event_name == 'pull_request'  # PR일 때만 실행
+      uses: madrapps/jacoco-report@v1.6.1
+      with:
+        paths: studytrack-backend/build/reports/jacoco/test/jacocoTestReport.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 70        # 전체 커버리지 70% 이상
+        min-coverage-changed-files: 80  # 변경된 파일은 80% 이상
+        title: 'Backend Test Coverage Report'

@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!-- StudyTrack Backend PMD 규칙 설정 -->
+<!-- 코드 품질, 성능, 보안 관련 규칙들을 포함 -->
+<ruleset name="StudyTrack PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 
+         https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>StudyTrack 프로젝트용 PMD 규칙</description>
+
+    <!-- 베스트 프랙티스 -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- JUnit 관련 규칙 완화 -->
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+    </rule>
+
+    <!-- 코드 스타일 -->
+    <rule ref="category/java/codestyle.xml">
+        <!-- 너무 엄격한 규칙들 제외 -->
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="TooManyStaticImports"/>
+    </rule>
+
+    <!-- 설계 -->
+    <rule ref="category/java/design.xml">
+        <!-- Spring Boot 프로젝트에서는 완화 -->
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="UseUtilityClass"/>
+    </rule>
+
+    <!-- 문서화 -->
+    <rule ref="category/java/documentation.xml">
+        <!-- Javadoc 관련 규칙들은 선택적으로 적용 -->
+        <exclude name="CommentRequired"/>
+        <exclude name="CommentSize"/>
+    </rule>
+
+    <!-- 에러 발생 가능성 -->
+    <rule ref="category/java/errorprone.xml">
+        <!-- 테스트 코드에서는 완화 -->
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="TestClassWithoutTestCases"/>
+    </rule>
+
+    <!-- 멀티스레딩 -->
+    <rule ref="category/java/multithreading.xml"/>
+
+    <!-- 성능 -->
+    <rule ref="category/java/performance.xml">
+        <!-- Spring에서 자주 사용되는 패턴들은 허용 -->
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
+
+    <!-- 보안 -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- 커스텀 규칙들 -->
+    
+    <!-- 메서드 길이 제한 -->
+    <rule ref="category/java/design.xml/ExcessiveMethodLength">
+        <properties>
+            <property name="minimum" value="100"/>
+        </properties>
+    </rule>
+
+    <!-- 클래스 길이 제한 -->
+    <rule ref="category/java/design.xml/ExcessiveClassLength">
+        <properties>
+            <property name="minimum" value="1000"/>
+        </properties>
+    </rule>
+
+    <!-- 매개변수 개수 제한 -->
+    <rule ref="category/java/design.xml/ExcessiveParameterList">
+        <properties>
+            <property name="minimum" value="8"/>
+        </properties>
+    </rule>
+
+    <!-- Cyclomatic Complexity 제한 -->
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="10"/>
+            <property name="classReportLevel" value="40"/>
+        </properties>
+    </rule>
+
+    <!-- 네이밍 규칙 강화 -->
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions"/>
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions"/>
+    <rule ref="category/java/codestyle.xml/FieldNamingConventions"/>
+    <rule ref="category/java/codestyle.xml/LocalVariableNamingConventions"/>
+
+</ruleset>

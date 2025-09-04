@@ -12,6 +12,34 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 export default defineConfig({
   plugins: [react()],
   test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
+      },
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.stories.{ts,tsx}',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+        'src/vite-env.d.ts',
+        'src/main.tsx',
+        '.storybook/',
+        'dist/',
+        'coverage/'
+      ]
+    },
     projects: [{
       extends: true,
       plugins: [

@@ -1,19 +1,51 @@
+# StudyTrack Backend - Java 코딩 스타일 설정
+# Google Java Style Guide 기반
 root = true
 
-[*.{kt,kts}]
+# 모든 파일 공통 설정
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Java 소스 파일
+[*.java]
 indent_style = space
 indent_size = 4
-trim_trailing_whitespace = true
-insert_final_newline = true
 max_line_length = 120
-end_of_line = lf
-charset = utf-8
+ij_java_use_single_class_imports = true
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999
+ij_java_packages_to_use_import_on_demand = 
+ij_java_import_layout = *,|,javax.**,java.**,|,$*
 
-disabled_rules = no-wildcard-imports
-ij_kotlin_disable_unused_imports = true
-ij_kotlin_disable_unused_parameters = true
-ij_kotlin_disable_unnecessary_parentheses = true
-ij_kotlin_disable_unnecessary_semicolons = true
-ij_kotlin_disable_unnecessary_variable = true
-ij_kotlin_disable_unnecessary_string_template = true
-ij_kotlin_disable_unnecessary_call = true
+# Gradle 빌드 파일
+[*.gradle]
+indent_style = space
+indent_size = 4
+
+# YAML 설정 파일 (application.yml 등)
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Properties 파일
+[*.properties]
+indent_style = space
+indent_size = 4
+
+# XML 파일 (Maven, Spring 설정 등)
+[*.xml]
+indent_style = space
+indent_size = 2
+
+# JSON 파일
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown 문서
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 80

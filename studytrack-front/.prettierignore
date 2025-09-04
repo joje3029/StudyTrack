@@ -1,0 +1,27 @@
+# 빌드 결과물
+dist/
+build/
+coverage/
+
+# 의존성
+node_modules/
+
+# Storybook
+.storybook/
+storybook-static/
+
+# 설정 파일들
+*.config.js
+*.config.ts
+vite.config.ts
+tailwind.config.js
+postcss.config.js
+
+# 자동 생성 파일들
+package-lock.json
+*.min.js
+*.min.css
+
+# 문서
+README.md
+CHANGELOG.md
