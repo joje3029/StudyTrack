@@ -1,8 +1,7 @@
 package com.studytrack.studytrackbackend.service;
 
-import com.studytrack.studytrackbackend.domain.Role;
 import com.studytrack.studytrackbackend.domain.User;
-import com.studytrack.studytrackbackend.domain.UserRepository;
+import com.studytrack.studytrackbackend.repository.UserRepository;
 import com.studytrack.studytrackbackend.security.GoogleUserInfo;
 import com.studytrack.studytrackbackend.security.KakaoUserInfo;
 import com.studytrack.studytrackbackend.security.NaverUserInfo;
@@ -36,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         OAuth2UserInfo userInfo = getOAuth2UserInfo(registrationId, attributes);
 
-        Optional<User> userOptional = userRepository.findByEmail(userInfo.getEmail());
+        Optional<User> userOptional = userRepository.findByProviderAndSocialId(registrationId, userInfo.getId());
         User user;
 
         if (userOptional.isEmpty()) {
@@ -67,7 +66,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = new User(
                 userInfo.getEmail(),
                 userInfo.getNickname(),
-                Role.USER,
                 registrationId,
                 userInfo.getId()
         );

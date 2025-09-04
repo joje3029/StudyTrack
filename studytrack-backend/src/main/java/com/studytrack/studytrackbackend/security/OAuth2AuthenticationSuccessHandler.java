@@ -1,7 +1,7 @@
 package com.studytrack.studytrackbackend.security;
 
 import com.studytrack.studytrackbackend.domain.User;
-import com.studytrack.studytrackbackend.domain.UserRepository;
+import com.studytrack.studytrackbackend.repository.UserRepository;
 import com.studytrack.studytrackbackend.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,8 +42,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         
         User user = userOptional.get();
-        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), "USER");
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), "USER");
 
         // TODO: Refresh Token을 DB나 Redis에 저장하는 로직 추가
 

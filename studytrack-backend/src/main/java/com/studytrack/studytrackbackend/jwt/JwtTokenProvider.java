@@ -1,6 +1,5 @@
 package com.studytrack.studytrackbackend.jwt;
 
-import com.studytrack.studytrackbackend.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -24,30 +23,30 @@ public class JwtTokenProvider {
     private final SecretKey key;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidity,
-            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidity) {
+            @Value("${jwt.secret:mySecretKey}") String secret,
+            @Value("${jwt.access-token-validity-in-seconds:3600}") long accessTokenValidity,
+            @Value("${jwt.refresh-token-validity-in-seconds:604800}") long refreshTokenValidity) {
         this.secret = secret;
         this.accessTokenValidity = accessTokenValidity;
         this.refreshTokenValidity = refreshTokenValidity;
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String createAccessToken(String email, Role role) {
+    public String createAccessToken(String email, String role) {
         return createToken(email, role, accessTokenValidity);
     }
 
-    public String createRefreshToken(String email, Role role) {
+    public String createRefreshToken(String email, String role) {
         return createToken(email, role, refreshTokenValidity);
     }
 
-    private String createToken(String email, Role role, long validitySeconds) {
+    private String createToken(String email, String role, long validitySeconds) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validitySeconds * 1000);
 
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role.name())
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
